@@ -56,6 +56,13 @@ export default function UserSongs({ userId }: UserSongsProps) {
             return;
         }
 
+        // 🧠 If deleted song is currently playing
+        const isCurrentlyPlaying =
+            currentIndex !== null &&
+            data &&
+            data[currentIndex]?.id === song.id;
+
+        // Remove from storage
         const coverPath = song.cover_image?.split("/cover-images/")?.[1];
         const audioPath = song.audio_url?.split("/audio-files/")?.[1];
 
@@ -65,6 +72,16 @@ export default function UserSongs({ userId }: UserSongsProps) {
 
         if (audioPath) {
             await supabase.storage.from("audio-files").remove([audioPath]);
+        }
+
+        // 🔥 Remove from queue if exists
+        if (data) {
+            const updatedQueue = data.filter(s => s.id !== song.id);
+            setQueue(updatedQueue);
+
+            if (isCurrentlyPlaying) {
+                setCurrentIndex(null); // stop player
+            }
         }
 
         queryClient.invalidateQueries({

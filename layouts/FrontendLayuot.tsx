@@ -11,47 +11,61 @@ import { Song } from "../types/song";
 type PlayerContextType = {
   isQueueModeOpen: boolean;
   setIsQueueModeOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
   currentMusic: Song | null;
+
   queue: Song[];
-  setQueue: (songs: Song[]) => void;
+  setQueue: React.Dispatch<React.SetStateAction<Song[]>>;
+
   playNext: () => void;
   playPrev: () => void;
-  setCurrentIndex: React.Dispatch<React.SetStateAction<number>>;
-  currentIndex: number;
+
+  setCurrentIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  currentIndex: number | null;
 };
 
-export const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
+export const PlayerContext =
+  createContext<PlayerContextType | undefined>(undefined);
 
 export default function FrontendLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
 
-  const queryclient = new QueryClient();
+  const queryClient = new QueryClient();
+
   const [isQueueModeOpen, setIsQueueModeOpen] = useState(false);
-  // const [currentMusic, setCurrentMusic] = useState<null | Song>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [queue, setQueue] = useState<Song[]>([]);
 
-
-  const PlayNext = () => {
-    if (currentIndex < queue.length - 1) {
-      setCurrentIndex((prevIndex) => prevIndex + 1);
+  // ✅ Play Next
+  const playNext = () => {
+    if (currentIndex !== null && currentIndex < queue.length - 1) {
+      setCurrentIndex(prev =>
+        prev !== null ? prev + 1 : 0
+      );
     }
-  }
+  };
 
-  const PlayPrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex((prevIndex) => prevIndex - 1)
+  // ✅ Play Previous
+  const playPrev = () => {
+    if (currentIndex !== null && currentIndex > 0) {
+      setCurrentIndex(prev =>
+        prev !== null ? prev - 1 : 0
+      );
     }
-  }
+  };
 
+  // ✅ Current Song Logic (SAFE)
   const currentMusic =
-    queue.length > 0 && currentIndex >= 0 && currentIndex < queue.length
+    currentIndex !== null &&
+    queue.length > 0 &&
+    currentIndex >= 0 &&
+    currentIndex < queue.length
       ? queue[currentIndex]
       : null;
 
   return (
-    <QueryClientProvider client={queryclient}>
+    <QueryClientProvider client={queryClient}>
       <PlayerContext.Provider
         value={{
           isQueueModeOpen,
@@ -61,8 +75,8 @@ export default function FrontendLayout({
           setCurrentIndex,
           queue,
           setQueue,
-          playNext: PlayNext,
-          playPrev: PlayPrev,
+          playNext,
+          playPrev,
         }}
       >
         <div className="min-h-screen bg-black text-white">
@@ -82,10 +96,10 @@ export default function FrontendLayout({
 
           </div>
 
-          {/* Queue (Right Side Slide Panel) */}
+          {/* Queue Panel */}
           <Queue />
 
-          {/* Music Player */}
+          {/* 🎵 Music Player only renders if song exists */}
           {currentMusic && <MusicPlayer />}
 
         </div>
