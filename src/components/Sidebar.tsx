@@ -40,7 +40,7 @@ export default function Sidebar() {
                     <div className="py-8 text-center">
                         <Link
                             href="/login"
-                            className="bg-white px-6 py-2 rounded-full font-semibold hover:bg-secondary-text"
+                            className="bg-white px-6 py-2 rounded-full font-semibold text-blue-600 hover:bg-hover"
                         >
                             Login
                         </Link>
