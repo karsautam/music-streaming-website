@@ -16,6 +16,8 @@ export default function Queue() {
     setCurrentIndex 
   } = context;
 
+  const nextStart = (currentIndex ?? -1) + 1;
+
   return (
     <div
       className={`
@@ -59,10 +61,10 @@ export default function Queue() {
       </h3>
 
       <div className="flex flex-col gap-3">
-        {queue.slice(currentIndex + 1).map((song, index) => (
+        {queue.slice(nextStart).map((song, index) => (
           <div
             key={song.id}
-            onClick={() => setCurrentIndex(currentIndex + 1 + index)}
+            onClick={() => setCurrentIndex(nextStart + index)}
             className="flex items-center gap-3 p-2 rounded-md cursor-pointer hover:bg-zinc-900 transition"
           >
             <img
@@ -82,7 +84,7 @@ export default function Queue() {
         ))}
       </div>
 
-      {queue.slice(currentIndex + 1).length === 0 && (
+      {queue.slice(nextStart).length === 0 && (
         <p className="text-gray-400 text-sm mt-3">
           No upcoming songs
         </p>
