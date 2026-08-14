@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GoSearch } from "react-icons/go";
-import { MdHomeFilled } from "react-icons/md";
 import useUserSession from "../../custom-hooks/useUserSession";
 import { useContext } from "react";
 import { PlayerContext } from "../../layouts/FrontendLayuot";
@@ -33,19 +32,14 @@ export default function Navbar() {
 
       {/* Left Section */}
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-        <Image
-          src="/images/dp.jpg"
-          alt="weekend"
-          width={70}
-          height={70}
-          className="w-12 h-12 ml-5 sm:ml-0 rounded-full hidden sm:block"
-        />
-
-        <Link
-          href="/"
-          className="bg-[#FA8072] w-11 h-11 grid place-items-center text-white text-2xl rounded-full"
-        >
-          <MdHomeFilled />
+        <Link href="/" title="Home" className="block">
+          <Image
+            src="/images/dp.jpg"
+            alt="weekend"
+            width={70}
+            height={70}
+            className="w-12 h-12 sm:w-14 sm:h-14 ml-1 sm:ml-0 rounded-full object-cover hover:scale-105 transition cursor-pointer"
+          />
         </Link>
       </div>
 
