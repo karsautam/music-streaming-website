@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { IoMdPause, IoMdVolumeLow, IoMdPlay, IoMdSkipBackward, IoMdSkipForward, IoMdVolumeHigh, IoMdVolumeOff } from "react-icons/io";
 import { LuReceipt } from "react-icons/lu";
-import { MdOutlineLoop, MdOutlineQueueMusic } from "react-icons/md";
+import { MdOutlineLoop, MdOutlineQueueMusic, MdShuffle } from "react-icons/md";
 // Import the microphone icon for lyrics
 import { TbMicrophone2 } from "react-icons/tb"; 
 import { PlayerContext } from "../../layouts/FrontendLayuot";
@@ -13,12 +13,8 @@ export default function MusicPlayer() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(50);
     const [loop, setLoop] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [previousVolume, setPreviousVolume] = useState(50);
-    
-    // State for toggling lyrics view
-    const [isLyricsOpen, setIsLyricsOpen] = useState(false);
 
     const context = useContext(PlayerContext);
 
@@ -26,7 +22,7 @@ export default function MusicPlayer() {
         throw new Error("MusicPlayer must be used inside PlayerProvider");
     }
 
-    const { isQueueModeOpen, setIsQueueModeOpen, currentMusic, playNext, playPrev } = context;
+    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, currentTime, setCurrentTime, playNext, playPrev } = context;
 
     const togglePlayButton = () => {
         if (!audioRef.current) return;
@@ -130,6 +126,59 @@ export default function MusicPlayer() {
         };
     }, [loop, playNext]);
 
+    // ✅ Keyboard shortcuts: Space = play/pause, Arrows = seek/volume, J/K = skip
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            const tag = (e.target as HTMLElement).tagName;
+            if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+            if (lyricsSyncActive) return;
+            if (!audioRef.current) return;
+
+            switch (e.key) {
+                case " ":
+                case "k":
+                    e.preventDefault();
+                    togglePlayButton();
+                    break;
+                case "ArrowRight":
+                    e.preventDefault();
+                    audioRef.current.currentTime = Math.min(
+                        audioRef.current.duration || 0,
+                        audioRef.current.currentTime + 5
+                    );
+                    break;
+                case "ArrowLeft":
+                    e.preventDefault();
+                    audioRef.current.currentTime = Math.max(
+                        0,
+                        audioRef.current.currentTime - 5
+                    );
+                    break;
+                case "ArrowUp":
+                    e.preventDefault();
+                    handleChangeVolume({ target: { value: String(Math.min(100, volume + 5)) } } as React.ChangeEvent<HTMLInputElement>);
+                    break;
+                case "ArrowDown":
+                    e.preventDefault();
+                    handleChangeVolume({ target: { value: String(Math.max(0, volume - 5)) } } as React.ChangeEvent<HTMLInputElement>);
+                    break;
+                case "j":
+                    e.preventDefault();
+                    playPrev();
+                    break;
+                case "l":
+                    e.preventDefault();
+                    playNext();
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    });
+
     if (!currentMusic) return null;
 
     return (
@@ -166,6 +215,14 @@ export default function MusicPlayer() {
 
                     <button onClick={playNext} className="cursor-pointer text-gray-300 hover:text-white transition">
                         <IoMdSkipForward size={18} className="md:w-5 md:h-5" />
+                    </button>
+
+                    <button
+                        onClick={() => setShuffle(prev => !prev)}
+                        className={`cursor-pointer transition ${shuffle ? "text-green-500" : "text-gray-300 hover:text-white"}`}
+                        title="Shuffle"
+                    >
+                        <MdShuffle size={18} className="md:w-5 md:h-5" />
                     </button>
 
                     <button

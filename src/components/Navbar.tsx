@@ -1,8 +1,12 @@
+'use client'
+
 import Image from "next/image";
 import Link from "next/link";
 import { GoSearch } from "react-icons/go";
 import { MdHomeFilled } from "react-icons/md";
 import useUserSession from "../../custom-hooks/useUserSession";
+import { useContext } from "react";
+import { PlayerContext } from "../../layouts/FrontendLayuot";
 
 import LogoutUser from "../../lib/auth/logoutUser";
 import { useRouter } from "next/navigation";
@@ -11,7 +15,11 @@ export default function Navbar() {
   
   const { session, loading } = useUserSession();
   const router = useRouter();
-  
+
+  const context = useContext(PlayerContext);
+  const searchQuery = context?.searchQuery ?? "";
+  const setSearchQuery = context?.setSearchQuery ?? (() => {});
+
   const handleLogout = async () => {
     const result = await LogoutUser();
 
@@ -41,11 +49,13 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Middle Section */}
-      <div className=" hidden lg:flex items-center bg-white rounded-full px-4 py-1 w-[400px]">
-        <GoSearch size={21} className="text-gray-500 mr-2" />
+      {/* Middle Section - Search */}
+      <div className="flex items-center bg-white rounded-full px-4 py-1 w-full max-w-[400px] mx-2 md:mx-4">
+        <GoSearch size={21} className="text-gray-500 mr-2 shrink-0" />
         <input
-          className="w-full outline-none text-black placeholder-gray-400"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full outline-none text-black placeholder-gray-400 bg-transparent"
           type="text"
           placeholder="What do you want to play?"
         />

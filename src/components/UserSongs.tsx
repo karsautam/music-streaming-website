@@ -1,7 +1,7 @@
 'use client'
 
 import Image from "next/image"
-import { FaTrash } from "react-icons/fa"
+import { FaTrash, FaHeart, FaRegHeart } from "react-icons/fa"
 import { supabase } from "../../lib/SupabaseClient"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import useUserSession from "../../custom-hooks/useUserSession"
@@ -18,7 +18,7 @@ export default function UserSongs({ userId }: UserSongsProps) {
     if (!context) {
         throw new Error("PlayerContext must be used within a PlayerProvider");
     }
-    const { setQueue, setCurrentIndex, currentIndex } = context;
+    const { setQueue, setCurrentIndex, currentIndex, toggleFavorite, isFavorite } = context;
 
     const { session } = useUserSession()
     const queryClient = useQueryClient()
@@ -127,6 +127,22 @@ export default function UserSongs({ userId }: UserSongsProps) {
                             {song.artist}
                         </p>
                     </div>
+
+                    {/* Favorite */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();   // 🔥 Prevent parent click
+                            toggleFavorite(song);
+                        }}
+                        className={`text-sm cursor-pointer transition ${
+                            isFavorite(song.id)
+                                ? "text-red-500"
+                                : "text-gray-400 hover:text-white"
+                        }`}
+                        title={isFavorite(song.id) ? "Remove from Favorites" : "Add to Favorites"}
+                    >
+                        {isFavorite(song.id) ? <FaHeart /> : <FaRegHeart />}
+                    </button>
 
                     {/* Delete */}
                     <button

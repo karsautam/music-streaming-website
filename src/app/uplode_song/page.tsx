@@ -13,6 +13,7 @@ export default function Page() {
   const [artist, setArtist] = useState("");
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [lyrics, setLyrics] = useState("");
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
   const { session } = useUserSession();
@@ -82,6 +83,7 @@ const handleUploadSong = async (
         artist,
         cover_image: imageURL,
         audio_url: audioURL,
+        lyrics,
         user_id: session?.user?.id,
       },
     ]);
@@ -97,6 +99,7 @@ const handleUploadSong = async (
     setArtist("");
     setImageFile(null);
     setAudioFile(null);
+    setLyrics("");
 
     router.push("/");
   } catch (error: unknown) {
@@ -176,6 +179,15 @@ const handleUploadSong = async (
               setImageFile(file);
 
             }}
+          />
+
+          <label className="block text-gray-200 text-sm">Lyrics</label>
+          <textarea
+            value={lyrics}
+            onChange={(e) => setLyrics(e.target.value)}
+            placeholder="Paste the song lyrics here..."
+            rows={6}
+            className="w-full bg-white/20 text-white placeholder-gray-300 text-sm p-3 rounded-xl outline-none focus:ring-2 focus:ring-red-500 transition resize-y"
           />
           <button
             type="submit"
