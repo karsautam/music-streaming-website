@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { GoSearch } from "react-icons/go";
 import useUserSession from "../../custom-hooks/useUserSession";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { PlayerContext } from "../../layouts/FrontendLayuot";
+import AboutWeekend from "./AboutWeekend";
 
 import LogoutUser from "../../lib/auth/logoutUser";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ export default function Navbar() {
   
   const { session, loading } = useUserSession();
   const router = useRouter();
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const context = useContext(PlayerContext);
   const searchQuery = context?.searchQuery ?? "";
@@ -28,19 +30,24 @@ export default function Navbar() {
 
   }
   return (
-    <nav className="h-16 flex justify-between items-center px-4 md:px-6 fixed top-0 left-0 w-full bg-red-900 z-50">
+    <>
+      <nav className="h-16 flex justify-between items-center px-4 md:px-6 fixed top-0 left-0 w-full bg-red-900 z-50">
 
       {/* Left Section */}
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-        <Link href="/" title="Home" className="block">
+        <button
+          onClick={() => setAboutOpen(true)}
+          title="About The Weeknd"
+          className="block cursor-pointer"
+        >
           <Image
             src="/images/dp.jpg"
             alt="weekend"
             width={70}
             height={70}
-            className="w-12 h-12 sm:w-14 sm:h-14 ml-1 sm:ml-0 rounded-full object-cover hover:scale-105 transition cursor-pointer"
+            className="w-12 h-12 sm:w-14 sm:h-14 ml-1 sm:ml-0 rounded-full object-cover hover:scale-105 transition"
           />
-        </Link>
+        </button>
       </div>
 
       {/* Middle Section - Search */}
@@ -84,7 +91,11 @@ export default function Navbar() {
 
       </div>
 
-    </nav>
+      </nav>
+
+      {/* About The Weeknd modal */}
+      <AboutWeekend open={aboutOpen} onClose={() => setAboutOpen(false)} />
+    </>
   )
 }
 
