@@ -32,13 +32,13 @@ export default function Navbar() {
     <nav className="h-16 flex justify-between items-center px-4 md:px-6 fixed top-0 left-0 w-full bg-red-900 z-50">
 
       {/* Left Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         <Image
           src="/images/dp.jpg"
           alt="weekend"
           width={70}
           height={70}
-          className="w-12 h-12 ml-5 rounded-full"
+          className="w-12 h-12 ml-5 sm:ml-0 rounded-full hidden sm:block"
         />
 
         <Link
@@ -50,19 +50,19 @@ export default function Navbar() {
       </div>
 
       {/* Middle Section - Search */}
-      <div className="flex items-center bg-white rounded-full px-4 py-1 w-full max-w-[400px] mx-2 md:mx-4">
+      <div className="flex flex-1 min-w-0 items-center bg-white rounded-full px-3 sm:px-4 py-1 max-w-[400px] mx-2 md:mx-4">
         <GoSearch size={21} className="text-gray-500 mr-2 shrink-0" />
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full outline-none text-black placeholder-gray-400 bg-transparent"
+          className="w-full min-w-0 outline-none text-black placeholder-gray-400 bg-transparent text-sm"
           type="text"
           placeholder="What do you want to play?"
         />
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-6 text-white ">
+      <div className="flex items-center gap-6 text-white shrink-0">
         <div className="hidden md:flex gap-4 text-secondary-text border-r-2 border-white pr-6 font-bold">
           <a href="#" className="hover:text-primary-text">Premium</a>
           <a href="#" className="hover:text-primary-text">Support</a>
