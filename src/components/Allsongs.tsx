@@ -67,7 +67,7 @@ export default function Allsongs() {
     return (
       <div className="min-h-[90vh] bg-background my-18 p-4 lg:ml-80 rounded-lg mx-4">
         <h2 className="text-white text-xl mb-3 font-semibold">
-          The Weekend Site
+          The Weeknd Site
         </h2>
         <div className=" animate-pulse grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
            {[...Array(9)].map((_, index) => (
@@ -86,7 +86,7 @@ export default function Allsongs() {
     return (
       <div className="min-h-[90vh] bg-background my-18 p-4 lg:ml-80 rounded-lg mx-4">
         <h2 className="text-white text-xl mb-3 font-semibold">
-          The Weekend Site
+          The Weeknd Site
         </h2>
         <h2 className="text-center text-white text-2xl">
           {(error as Error).message}
@@ -99,7 +99,7 @@ export default function Allsongs() {
     <div className="min-h-[90vh] bg-background my-8 p-4 lg:ml-80 rounded-lg mx-4">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <h2 className="text-white text-xl font-semibold">
-          The Weekend Site
+          The Weeknd Site
         </h2>
 
         {/* Filter pills */}
