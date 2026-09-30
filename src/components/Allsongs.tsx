@@ -1,7 +1,7 @@
 'use client'
 
 import Image from "next/image"
-import { IoMdPlay } from "react-icons/io"
+import { IoMdPlay, IoMdArrowBack } from "react-icons/io"
 import { FaHeart, FaRegHeart } from "react-icons/fa"
 import { supabase } from "../../lib/SupabaseClient"
 import { useQuery } from "@tanstack/react-query"
@@ -18,7 +18,7 @@ export default function Allsongs() {
   if (!context) {
     throw new Error("PlayerContext must be used within a PlayerProvider");
   }
-  const { setQueue, setCurrentIndex, searchQuery, favorites, toggleFavorite, isFavorite, recentlyPlayed, currentMusic, isPlaying, isNowPlayingOpen } = context;
+  const { setQueue, setCurrentIndex, searchQuery, favorites, toggleFavorite, isFavorite, recentlyPlayed, currentMusic, isPlaying, isNowPlayingOpen, setIsNowPlayingOpen } = context;
 
   const [filter, setFilter] = useState<"all" | "favorites">("all");
 
@@ -98,6 +98,28 @@ export default function Allsongs() {
     );
   }
 
+  if (isNowPlayingOpen && currentMusic) {
+    return (
+      <div className="min-h-[90vh] bg-background my-8 p-4 lg:ml-80 rounded-lg mx-4">
+        <div className="flex items-center gap-3 mb-4">
+          <button
+            onClick={() => setIsNowPlayingOpen(false)}
+            className="flex items-center gap-2 text-sm text-secondary-text hover:text-white transition cursor-pointer"
+          >
+            <IoMdArrowBack size={18} />
+            All songs
+          </button>
+        </div>
+
+        {/* Large cover + controls */}
+        <ExpandedPlayer key={currentMusic.id} />
+
+        {/* Lyrics - reached by scrolling down, Spotify style */}
+        <AllSongsLyrics />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[90vh] bg-background my-8 p-4 lg:ml-80 rounded-lg mx-4">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
@@ -131,9 +153,6 @@ export default function Allsongs() {
           </button>
         </div>
       </div>
-
-      {/* Full cover + controls - appears here after tapping the footer cover */}
-      {isNowPlayingOpen && <ExpandedPlayer />}
 
       {/* Recently Played */}
       {recentlyPlayed.length > 0 && !searchQuery.trim() && filter === "all" && (
@@ -244,9 +263,6 @@ export default function Allsongs() {
             : "No songs available."}
         </p>
       )}
-
-      {/* Lyrics for the running song - sits at the very bottom */}
-      <AllSongsLyrics />
     </div>
   )
 }

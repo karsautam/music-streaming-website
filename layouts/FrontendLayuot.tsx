@@ -102,11 +102,9 @@ export default function FrontendLayout({
     const audio = audioRef.current;
     if (!audio) return;
     if (audio.paused) {
-      audio.play();
-      setIsPlaying(true);
+      audio.play().catch(() => setIsPlaying(false));
     } else {
       audio.pause();
-      setIsPlaying(false);
     }
   }, []);
 
@@ -127,12 +125,19 @@ export default function FrontendLayout({
       setDuration(audio.duration || 0);
     };
 
+    const syncPlaying = () => setIsPlaying(!audio.paused);
+
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateTime);
+    audio.addEventListener("play", syncPlaying);
+    audio.addEventListener("pause", syncPlaying);
+    audio.addEventListener("ended", () => setIsPlaying(false));
 
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("loadedmetadata", updateTime);
+      audio.removeEventListener("play", syncPlaying);
+      audio.removeEventListener("pause", syncPlaying);
     };
   }, []);
 
@@ -202,6 +207,9 @@ export default function FrontendLayout({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentMusic) return;
+
+    audio.currentTime = 0;
+    audio.load();
 
     const playAudio = async () => {
       try {
