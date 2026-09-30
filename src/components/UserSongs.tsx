@@ -19,7 +19,7 @@ export default function UserSongs({ userId }: UserSongsProps) {
     if (!context) {
         throw new Error("PlayerContext must be used within a PlayerProvider");
     }
-    const { setQueue, setCurrentIndex, currentIndex, toggleFavorite, isFavorite, isPlaying } = context;
+    const { setQueue, setCurrentIndex, toggleFavorite, isFavorite, isPlaying, currentMusic } = context;
 
     const { session } = useUserSession()
     const queryClient = useQueryClient()
@@ -58,10 +58,7 @@ export default function UserSongs({ userId }: UserSongsProps) {
         }
 
         // 🧠 If deleted song is currently playing
-        const isCurrentlyPlaying =
-            currentIndex !== null &&
-            data &&
-            data[currentIndex]?.id === song.id;
+        const isCurrentlyPlaying = currentMusic?.id === song.id;
 
         // Remove from storage
         const coverPath = song.cover_image?.split("/cover-images/")?.[1];
@@ -102,7 +99,7 @@ export default function UserSongs({ userId }: UserSongsProps) {
             )}
 
             {data?.map((song, index) => {
-                const isCurrent = currentIndex !== null && data[currentIndex]?.id === song.id;
+                const isCurrent = currentMusic?.id === song.id;
 
                 return (
                 <div

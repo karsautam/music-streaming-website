@@ -7,6 +7,7 @@ import { MdOutlineLoop, MdOutlineQueueMusic, MdShuffle } from "react-icons/md";
 // Import the microphone icon for lyrics
 import { TbMicrophone2 } from "react-icons/tb"; 
 import { PlayerContext } from "../../layouts/FrontendLayuot";
+import ExpandedPlayer from "./ExpandedPlayer";
 import NowPlayingBars from "./NowPlayingBars";
 
 export default function MusicPlayer() {
@@ -22,7 +23,7 @@ export default function MusicPlayer() {
         throw new Error("MusicPlayer must be used inside PlayerProvider");
     }
 
-    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, setIsPlaying, currentTime, setCurrentTime, playNext, playPrev } = context;
+    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, setIsPlaying, currentTime, setCurrentTime, playNext, playPrev, isNowPlayingOpen, setIsNowPlayingOpen } = context;
 
     const togglePlayButton = () => {
         if (!audioRef.current) return;
@@ -184,6 +185,31 @@ export default function MusicPlayer() {
     const progressPercent = duration ? (currentTime / duration) * 100 : 0;
 
     return (
+        <>
+        {isNowPlayingOpen && (
+            <ExpandedPlayer
+                currentMusic={currentMusic}
+                audioRef={audioRef}
+                isPlaying={isPlaying}
+                togglePlayButton={togglePlayButton}
+                playNext={playNext}
+                playPrev={playPrev}
+                shuffle={shuffle}
+                setShuffle={setShuffle}
+                loop={loop}
+                toggleLoop={toggleLoop}
+                currentTime={currentTime}
+                duration={duration}
+                volume={volume}
+                handleChangeVolume={handleChangeVolume}
+                toggleMute={toggleMute}
+                formatTime={formatTime}
+                isLyricsOpen={isLyricsOpen}
+                setIsLyricsOpen={setIsLyricsOpen}
+                isQueueModeOpen={isQueueModeOpen}
+                setIsQueueModeOpen={setIsQueueModeOpen}
+            />
+        )}
         <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-black via-black to-zinc-900/70 text-white flex flex-wrap md:flex-nowrap items-center justify-between px-3 sm:px-6 py-2 sm:py-3 z-60 gap-y-2 md:gap-y-0 border-t border-white/10 shadow-[0_-10px_40px_-12px_rgba(0,0,0,0.9)]">
             <div
                 aria-hidden="true"
@@ -193,7 +219,12 @@ export default function MusicPlayer() {
             <audio src={currentMusic.audio_url || ""} ref={audioRef}></audio>
             
             {/* Left Section - Song Info */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-[55%] md:w-auto md:flex-1 order-1">
+            <button
+                type="button"
+                onClick={() => setIsNowPlayingOpen(true)}
+                title="Open full player"
+                className="flex items-center gap-2 sm:gap-3 min-w-0 w-[55%] md:w-auto md:flex-1 order-1 text-left cursor-pointer hover:opacity-80 transition-opacity"
+            >
                 <div className="relative shrink-0">
                     <img
                         src={currentMusic.cover_image || ""}
@@ -205,21 +236,21 @@ export default function MusicPlayer() {
                         }`}
                     />
                 </div>
-                <div className="flex flex-col min-w-0 cursor-pointer">
+                <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <NowPlayingBars active={isPlaying} className="h-2.5" />
                         <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">
                             {isPlaying ? "Now Playing" : "Paused"}
                         </span>
                     </div>
-                    <h3 className="text-sm font-semibold truncate cursor-pointer">
+                    <h3 className="text-sm font-semibold truncate">
                         {currentMusic.title}
                     </h3>
-                    <p className="text-[11px] sm:text-xs text-gray-400 truncate cursor-pointer hover:underline">
+                    <p className="text-[11px] sm:text-xs text-gray-400 truncate hover:underline">
                         {currentMusic.artist}
                     </p>
                 </div>
-            </div>
+            </button>
 
             {/* Center Section - Controls */}
             <div className="w-full md:w-auto md:max-w-[400px] md:flex-1 flex flex-col items-center gap-1 sm:gap-2 md:gap-3 order-3 md:order-2 pb-1 md:pb-0">
@@ -320,5 +351,6 @@ export default function MusicPlayer() {
                 </div>
             </div>
         </div>
+        </>
     )
 }
