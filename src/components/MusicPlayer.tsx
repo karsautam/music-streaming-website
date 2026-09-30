@@ -1,13 +1,11 @@
 'use client'
 
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { IoMdPause, IoMdVolumeLow, IoMdPlay, IoMdSkipBackward, IoMdSkipForward, IoMdVolumeHigh, IoMdVolumeOff } from "react-icons/io";
-import { LuReceipt } from "react-icons/lu";
 import { MdOutlineLoop, MdOutlineQueueMusic, MdShuffle } from "react-icons/md";
 // Import the microphone icon for lyrics
 import { TbMicrophone2 } from "react-icons/tb"; 
 import { PlayerContext } from "../../layouts/FrontendLayuot";
-import ExpandedPlayer from "./ExpandedPlayer";
 import NowPlayingBars from "./NowPlayingBars";
 
 export default function MusicPlayer() {
@@ -19,7 +17,7 @@ export default function MusicPlayer() {
         throw new Error("MusicPlayer must be used inside PlayerProvider");
     }
 
-    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, setIsPlaying, currentTime, setCurrentTime, playNext, playPrev, isNowPlayingOpen, setIsNowPlayingOpen, duration, audioRef, seek, togglePlay, formatTime, loop, setLoop, volume, setVolume } = context;
+    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, playNext, playPrev, setIsNowPlayingOpen, duration, audioRef, seek, togglePlay, formatTime, loop, setLoop, volume, setVolume, currentTime } = context;
 
     const togglePlayButton = togglePlay;
 
@@ -102,30 +100,6 @@ export default function MusicPlayer() {
 
     return (
         <>
-        {isNowPlayingOpen && (
-            <ExpandedPlayer
-                currentMusic={currentMusic}
-                audioRef={audioRef}
-                isPlaying={isPlaying}
-                togglePlayButton={togglePlayButton}
-                playNext={playNext}
-                playPrev={playPrev}
-                shuffle={shuffle}
-                setShuffle={setShuffle}
-                loop={loop}
-                toggleLoop={toggleLoop}
-                currentTime={currentTime}
-                duration={duration}
-                volume={volume}
-                handleChangeVolume={handleChangeVolume}
-                toggleMute={toggleMute}
-                formatTime={formatTime}
-                isLyricsOpen={isLyricsOpen}
-                setIsLyricsOpen={setIsLyricsOpen}
-                isQueueModeOpen={isQueueModeOpen}
-                setIsQueueModeOpen={setIsQueueModeOpen}
-            />
-        )}
         <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-black via-black to-zinc-900/70 text-white flex flex-wrap md:flex-nowrap items-center justify-between px-3 sm:px-6 py-2 sm:py-3 z-60 gap-y-2 md:gap-y-0 border-t border-white/10 shadow-[0_-10px_40px_-12px_rgba(0,0,0,0.9)]">
             <div
                 aria-hidden="true"

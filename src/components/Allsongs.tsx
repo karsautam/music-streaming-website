@@ -8,8 +8,8 @@ import { useQuery } from "@tanstack/react-query"
 import { Song } from "../../types/song"
 import { useContext, useMemo, useState } from "react"
 import { PlayerContext } from "../../layouts/FrontendLayuot"
-import AllSongsHero from "./AllSongsHero"
 import AllSongsLyrics from "./AllSongsLyrics"
+import ExpandedPlayer from "./ExpandedPlayer"
 import NowPlayingBars from "./NowPlayingBars"
 
 export default function Allsongs() {
@@ -18,7 +18,7 @@ export default function Allsongs() {
   if (!context) {
     throw new Error("PlayerContext must be used within a PlayerProvider");
   }
-  const { setQueue, setCurrentIndex, searchQuery, favorites, toggleFavorite, isFavorite, recentlyPlayed, currentMusic, isPlaying } = context;
+  const { setQueue, setCurrentIndex, searchQuery, favorites, toggleFavorite, isFavorite, recentlyPlayed, currentMusic, isPlaying, isNowPlayingOpen } = context;
 
   const [filter, setFilter] = useState<"all" | "favorites">("all");
 
@@ -132,8 +132,8 @@ export default function Allsongs() {
         </div>
       </div>
 
-      {/* Full cover + controls for the running song */}
-      <AllSongsHero />
+      {/* Full cover + controls - appears here after tapping the footer cover */}
+      {isNowPlayingOpen && <ExpandedPlayer />}
 
       {/* Recently Played */}
       {recentlyPlayed.length > 0 && !searchQuery.trim() && filter === "all" && (
