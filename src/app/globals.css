@@ -41,7 +41,8 @@
   --range-progress: 0%;
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
+  display: block;
+  height: 6px;
   border-radius: 9999px;
   outline: none;
   cursor: pointer;
@@ -55,8 +56,9 @@
 .player-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
+  border: none;
   border-radius: 9999px;
   background: #ffffff;
   box-shadow: 0 0 0 0 rgb(29 185 84 / 0.5);
@@ -70,10 +72,16 @@
 }
 
 .player-range::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border: none;
   border-radius: 9999px;
   background: #ffffff;
   cursor: pointer;
+}
+
+.player-range::-moz-range-track {
+  height: 6px;
+  border-radius: 9999px;
+  background: transparent;
 }

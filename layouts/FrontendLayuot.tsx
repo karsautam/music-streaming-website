@@ -95,7 +95,10 @@ export default function FrontendLayout({
   }, [volume]);
 
   const seek = useCallback((time: number) => {
-    if (audioRef.current) audioRef.current.currentTime = time;
+    setCurrentTime(time);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+    }
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -116,6 +119,15 @@ export default function FrontendLayout({
     return `${minutes}:${seconds}`;
   }, []);
 
+  // ✅ Current Song Logic (SAFE)
+  const currentMusic =
+    currentIndex !== null &&
+    queue.length > 0 &&
+    currentIndex >= 0 &&
+    currentIndex < queue.length
+      ? queue[currentIndex]
+      : null;
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -126,29 +138,28 @@ export default function FrontendLayout({
     };
 
     const syncPlaying = () => setIsPlaying(!audio.paused);
+    const syncEnded = () => setIsPlaying(false);
 
     audio.addEventListener("timeupdate", updateTime);
     audio.addEventListener("loadedmetadata", updateTime);
+    audio.addEventListener("durationchange", updateTime);
+    audio.addEventListener("seeked", updateTime);
     audio.addEventListener("play", syncPlaying);
     audio.addEventListener("pause", syncPlaying);
-    audio.addEventListener("ended", () => setIsPlaying(false));
+    audio.addEventListener("ended", syncEnded);
+
+    updateTime();
 
     return () => {
       audio.removeEventListener("timeupdate", updateTime);
       audio.removeEventListener("loadedmetadata", updateTime);
+      audio.removeEventListener("durationchange", updateTime);
+      audio.removeEventListener("seeked", updateTime);
       audio.removeEventListener("play", syncPlaying);
       audio.removeEventListener("pause", syncPlaying);
+      audio.removeEventListener("ended", syncEnded);
     };
-  }, []);
-
-  // ✅ Current Song Logic (SAFE)
-  const currentMusic =
-    currentIndex !== null &&
-    queue.length > 0 &&
-    currentIndex >= 0 &&
-    currentIndex < queue.length
-      ? queue[currentIndex]
-      : null;
+  }, [currentMusic]);
 
   // ✅ Favorites (localStorage)
   const [favorites, setFavorites] = useState<Song[]>(() => {
