@@ -6,7 +6,7 @@ import Queue from "@/components/Queue";
 import Lyrics from "@/components/Lyrics";
 import Sidebar from "@/components/Sidebar";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { Song } from "../types/song";
 
 type PlayerContextType = {
@@ -26,6 +26,18 @@ type PlayerContextType = {
 
   isNowPlayingOpen: boolean;
   setIsNowPlayingOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
+  duration: number;
+  seek: (time: number) => void;
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  togglePlay: () => void;
+  formatTime: (time: number) => string;
+
+  loop: boolean;
+  setLoop: React.Dispatch<React.SetStateAction<boolean>>;
+
+  volume: number;
+  setVolume: React.Dispatch<React.SetStateAction<number>>;
 
   currentTime: number;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
@@ -69,8 +81,60 @@ export default function FrontendLayout({
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [queue, setQueue] = useState<Song[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [shuffle, setShuffle] = useState(false);
+  const [loop, setLoop] = useState(false);
+  const [volume, setVolume] = useState(50);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.volume = volume / 100;
+  }, [volume]);
+
+  const seek = useCallback((time: number) => {
+    if (audioRef.current) audioRef.current.currentTime = time;
+  }, []);
+
+  const togglePlay = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play();
+      setIsPlaying(true);
+    } else {
+      audio.pause();
+      setIsPlaying(false);
+    }
+  }, []);
+
+  const formatTime = useCallback((time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }, []);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updateTime = () => {
+      setCurrentTime(audio.currentTime);
+      setDuration(audio.duration || 0);
+    };
+
+    audio.addEventListener("timeupdate", updateTime);
+    audio.addEventListener("loadedmetadata", updateTime);
+
+    return () => {
+      audio.removeEventListener("timeupdate", updateTime);
+      audio.removeEventListener("loadedmetadata", updateTime);
+    };
+  }, []);
 
   // ✅ Current Song Logic (SAFE)
   const currentMusic =
@@ -135,6 +199,22 @@ export default function FrontendLayout({
     });
   }, [currentMusic]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentMusic) return;
+
+    const playAudio = async () => {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.log("Audioplay error:", error);
+        setIsPlaying(false);
+      }
+    };
+    playAudio();
+  }, [currentMusic]);
+
   // ✅ Play Next (shuffle-aware)
   const playNext = () => {
     if (currentIndex === null || queue.length === 0) return;
@@ -171,6 +251,23 @@ export default function FrontendLayout({
     }
   };
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      if (audio.loop) {
+        audio.currentTime = 0;
+        audio.play();
+      } else {
+        playNext();
+      }
+    };
+
+    audio.addEventListener("ended", handleEnded);
+    return () => audio.removeEventListener("ended", handleEnded);
+  }, [playNext]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <PlayerContext.Provider
@@ -186,6 +283,15 @@ export default function FrontendLayout({
           setIsPlaying,
           isNowPlayingOpen,
           setIsNowPlayingOpen,
+          duration,
+          seek,
+          audioRef,
+          togglePlay,
+          formatTime,
+          loop,
+          setLoop,
+          volume,
+          setVolume,
           currentTime,
           setCurrentTime,
           currentIndex,
@@ -226,6 +332,14 @@ export default function FrontendLayout({
 
           {/* Lyrics Panel */}
           <Lyrics />
+
+          {/* 🎵 Single shared audio element for the whole app */}
+          {currentMusic && (
+            <audio
+              src={currentMusic.audio_url || ""}
+              ref={audioRef}
+            ></audio>
+          )}
 
           {/* 🎵 Music Player only renders if song exists */}
           {currentMusic && <MusicPlayer />}

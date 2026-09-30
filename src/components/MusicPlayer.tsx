@@ -11,10 +11,6 @@ import ExpandedPlayer from "./ExpandedPlayer";
 import NowPlayingBars from "./NowPlayingBars";
 
 export default function MusicPlayer() {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [volume, setVolume] = useState(50);
-    const [loop, setLoop] = useState(false);
-    const [duration, setDuration] = useState(0);
     const [previousVolume, setPreviousVolume] = useState(50);
 
     const context = useContext(PlayerContext);
@@ -23,109 +19,29 @@ export default function MusicPlayer() {
         throw new Error("MusicPlayer must be used inside PlayerProvider");
     }
 
-    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, setIsPlaying, currentTime, setCurrentTime, playNext, playPrev, isNowPlayingOpen, setIsNowPlayingOpen } = context;
+    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, setIsPlaying, currentTime, setCurrentTime, playNext, playPrev, isNowPlayingOpen, setIsNowPlayingOpen, duration, audioRef, seek, togglePlay, formatTime, loop, setLoop, volume, setVolume } = context;
 
-    const togglePlayButton = () => {
-        if (!audioRef.current) return;
-
-        if (isPlaying) {
-            audioRef.current.pause();
-        } else {
-            audioRef.current.play();
-        }
-        setIsPlaying(!isPlaying)
-    }
-
-    
+    const togglePlayButton = togglePlay;
 
     const toggleMute = () => {
-        if (!audioRef.current) return;
-
         if (volume === 0) {
             setVolume(previousVolume);
-            audioRef.current.volume = previousVolume / 100;
         } else {
             setPreviousVolume(volume);
             setVolume(0);
-            audioRef.current.volume = 0;
         }
     };
 
     const toggleLoop = () => {
-        if (!audioRef.current) return;
-        const newLoopState = !loop;
-        setLoop(newLoopState);
-        audioRef.current.loop = newLoopState;
+        setLoop(prev => {
+            if (audioRef.current) audioRef.current.loop = !prev;
+            return !prev;
+        });
     };
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
-
-        const updateTime = () => {
-            setCurrentTime(audio.currentTime);
-            setDuration(audio.duration || 0);
-        };
-
-        audio.addEventListener("timeupdate", updateTime);
-        audio.addEventListener("loadedmetadata", updateTime);
-
-        return () => {
-            audio.removeEventListener("timeupdate", updateTime);
-            audio.removeEventListener("loadedmetadata", updateTime);
-        };
-    }, []);
-
-    const formatTime = (time: number) => {
-        const minutes = Math.floor(time / 60);
-        const Seconds = Math.floor(time % 60).toString().padStart(2, "0");
-        return `${minutes}:${Seconds}`;
-    }
 
     const handleChangeVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const vol = parseInt(e.target.value);
-        setVolume(vol);
-
-        if (audioRef.current) {
-            audioRef.current.volume = vol / 100;
-        }
+        setVolume(parseInt(e.target.value));
     };
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio || !currentMusic) return;
-
-        const playAudio = async () => {
-            try {
-                await audio.play();
-                setIsPlaying(true);
-            } catch (error) {
-                console.log("Audioplay error:", error)
-                setIsPlaying(false);
-            }
-        };
-        playAudio();
-    }, [currentMusic, setIsPlaying])
-
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
-
-        const handleEnded = () => {
-            if (loop) {
-                audio.currentTime = 0;
-                audio.play();
-            } else {
-                playNext();
-            }
-        };
-
-        audio.addEventListener("ended", handleEnded);
-
-        return () => {
-            audio.removeEventListener("ended", handleEnded);
-        };
-    }, [loop, playNext]);
 
     // ✅ Keyboard shortcuts: Space = play/pause, Arrows = seek/volume, J/K = skip
     useEffect(() => {
@@ -216,8 +132,7 @@ export default function MusicPlayer() {
                 className="absolute top-0 left-0 h-[2px] bg-primary shadow-[0_0_12px_1px_rgba(29,185,84,0.6)] transition-[width] duration-150 pointer-events-none"
                 style={{ width: `${progressPercent}%` }}
             />
-            <audio src={currentMusic.audio_url || ""} ref={audioRef}></audio>
-            
+
             {/* Left Section - Song Info */}
             <button
                 type="button"
@@ -291,12 +206,7 @@ export default function MusicPlayer() {
                         min="0"
                         max={duration || 0}
                         value={currentTime || 0}
-                        onChange={(e) => {
-                            const time = Number(e.target.value);
-                            if (audioRef.current) {
-                                audioRef.current.currentTime = time;
-                            }
-                        }}
+                        onChange={(e) => seek(Number(e.target.value))}
                         style={{ "--range-progress": `${progressPercent}%` } as React.CSSProperties}
                         className="player-range w-full"
                     />

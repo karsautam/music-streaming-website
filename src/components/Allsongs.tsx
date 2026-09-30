@@ -8,6 +8,9 @@ import { useQuery } from "@tanstack/react-query"
 import { Song } from "../../types/song"
 import { useContext, useMemo, useState } from "react"
 import { PlayerContext } from "../../layouts/FrontendLayuot"
+import AllSongsHero from "./AllSongsHero"
+import AllSongsLyrics from "./AllSongsLyrics"
+import NowPlayingBars from "./NowPlayingBars"
 
 export default function Allsongs() {
 
@@ -15,7 +18,7 @@ export default function Allsongs() {
   if (!context) {
     throw new Error("PlayerContext must be used within a PlayerProvider");
   }
-  const { setQueue, setCurrentIndex, searchQuery, favorites, toggleFavorite, isFavorite, recentlyPlayed } = context;
+  const { setQueue, setCurrentIndex, searchQuery, favorites, toggleFavorite, isFavorite, recentlyPlayed, currentMusic, isPlaying } = context;
 
   const [filter, setFilter] = useState<"all" | "favorites">("all");
 
@@ -129,6 +132,9 @@ export default function Allsongs() {
         </div>
       </div>
 
+      {/* Full cover + controls for the running song */}
+      <AllSongsHero />
+
       {/* Recently Played */}
       {recentlyPlayed.length > 0 && !searchQuery.trim() && filter === "all" && (
         <div className="mb-8">
@@ -170,6 +176,7 @@ export default function Allsongs() {
       <div className="grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {visibleSongs.map((song: Song, index) => {
           const fav = isFavorite(song.id);
+          const isCurrent = currentMusic?.id === song.id;
           return (
             <div
               key={song.id} onClick={() => startPlayingSong(visibleSongs, index)}
@@ -202,8 +209,21 @@ export default function Allsongs() {
                 className="w-full h-50 object-cover"
               />
 
+              {isCurrent && (
+                <span className="absolute top-3 left-3 z-10 flex items-center gap-1.5 bg-black/80 backdrop-blur-sm px-2 py-1 rounded-full border border-primary/50">
+                  <NowPlayingBars active={isPlaying} className="h-2" />
+                  <span className="text-[9px] font-bold uppercase tracking-[0.15em] text-primary">
+                    Playing
+                  </span>
+                </span>
+              )}
+
               <div className="mt-2">
-                <p className="text-primary-text font-mono truncate">
+                <p
+                  className={`font-mono truncate ${
+                    isCurrent ? "text-primary" : "text-primary-text"
+                  }`}
+                >
                   {song.title}
                 </p>
                 <p className="text-shadow-primary-text font-semibold text-xs truncate">
@@ -224,6 +244,9 @@ export default function Allsongs() {
             : "No songs available."}
         </p>
       )}
+
+      {/* Lyrics for the running song - sits at the very bottom */}
+      <AllSongsLyrics />
     </div>
-  );
+  )
 }
