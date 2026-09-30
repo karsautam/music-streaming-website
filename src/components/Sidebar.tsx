@@ -1,28 +1,40 @@
 'use client'
 
 import Link from "next/link"
-import { useState } from "react"
+import { useContext } from "react"
 import { LuPlus } from "react-icons/lu"
-import { MdOutlineLibraryMusic } from "react-icons/md"
+import { MdClose } from "react-icons/md"
 import useUserSession from "../../custom-hooks/useUserSession"
+import { PlayerContext } from "../../layouts/FrontendLayuot"
 import UserSongs from "./UserSongs"
 
 export default function Sidebar() {
-    const [sidebarOpen, setSidebarOpen] = useState(false)
+    const context = useContext(PlayerContext)
+    const sidebarOpen = context?.sidebarOpen ?? false
+    const setSidebarOpen = context?.setSidebarOpen ?? (() => {})
     const { loading, session } = useUserSession();
 
     return (
         <>
             <aside
-                className={`z-50 fixed left-2 top-14 my-4 bg-background w-75 rounded-2xl h-[90vh] p-3 overflow-y-auto 
-                ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
+                className={`z-50 fixed left-2 top-14 my-4 bg-background w-75 max-w-[calc(100vw-1rem)] rounded-2xl h-[90vh] p-3 overflow-y-auto shadow-2xl
+                ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
                 transition-transform duration-500 lg:translate-x-0`}
             >
                 <div className="flex justify-between text-primary-text items-center mb-3">
                     <h2 className="font-bold">Your Library</h2>
-                    <Link href="/uplode_song">
-                        <LuPlus />
-                    </Link>
+                    <div className="flex items-center gap-1">
+                        <Link href="/uplode_song" className="p-1.5 hover:bg-white/10 rounded-full transition">
+                            <LuPlus />
+                        </Link>
+                        <button
+                            onClick={() => setSidebarOpen(false)}
+                            aria-label="Close library"
+                            className="lg:hidden p-1.5 text-secondary-text hover:text-white hover:bg-white/10 rounded-full transition cursor-pointer"
+                        >
+                            <MdClose size={18} />
+                        </button>
+                    </div>
                 </div>
 
                 {loading ? (
@@ -50,13 +62,6 @@ export default function Sidebar() {
                     </div>
                 )}
             </aside>
-
-            <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="z-55 fixed top-5 left-1 bg-black lg:hidden h-8 w-8 grid place-items-center text-white rounded-full cursor-pointer"
-            >
-                <MdOutlineLibraryMusic />
-            </button>
         </>
     );
 }

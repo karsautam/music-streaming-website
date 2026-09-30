@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { GoSearch } from "react-icons/go";
+import { MdOutlineLibraryMusic } from "react-icons/md";
 import useUserSession from "../../custom-hooks/useUserSession";
 import { useContext, useState } from "react";
 import { PlayerContext } from "../../layouts/FrontendLayuot";
@@ -20,6 +21,8 @@ export default function Navbar() {
   const context = useContext(PlayerContext);
   const searchQuery = context?.searchQuery ?? "";
   const setSearchQuery = context?.setSearchQuery ?? (() => {});
+  const sidebarOpen = context?.sidebarOpen ?? false;
+  const setSidebarOpen = context?.setSidebarOpen ?? (() => {});
 
   const handleLogout = async () => {
     const result = await LogoutUser();
@@ -35,6 +38,15 @@ export default function Navbar() {
 
       {/* Left Section */}
       <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+        <button
+          onClick={() => setSidebarOpen((prev) => !prev)}
+          aria-label={sidebarOpen ? "Close library" : "Open library"}
+          title="Your Library"
+          className="lg:hidden grid place-items-center h-9 w-9 shrink-0 rounded-full text-white/90 hover:text-white bg-white/10 hover:bg-white/20 active:scale-90 transition cursor-pointer"
+        >
+          <MdOutlineLibraryMusic size={19} />
+        </button>
+
         <button
           onClick={() => setAboutOpen(true)}
           title="About The Weeknd"

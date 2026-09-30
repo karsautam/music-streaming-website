@@ -16,6 +16,9 @@ type PlayerContextType = {
   isLyricsOpen: boolean;
   setIsLyricsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 
+  sidebarOpen: boolean;
+  setSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
+
   lyricsSyncActive: boolean;
   setLyricsSyncActive: React.Dispatch<React.SetStateAction<boolean>>;
 
@@ -80,6 +83,7 @@ export default function FrontendLayout({
 
   const [isQueueModeOpen, setIsQueueModeOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [lyricsSyncActive, setLyricsSyncActive] = useState(false);
   const [lyricsFetchState, setLyricsFetchState] =
     useState<"idle" | "loading" | "notfound" | "done">("idle");
@@ -303,8 +307,10 @@ export default function FrontendLayout({
         value={{
           isQueueModeOpen,
           setIsQueueModeOpen,
-          isLyricsOpen,
-          setIsLyricsOpen,
+isLyricsOpen,
+    setIsLyricsOpen,
+    sidebarOpen,
+    setSidebarOpen,
 lyricsSyncActive,
     setLyricsSyncActive,
     lyricsFetchState,
