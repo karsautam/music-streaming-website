@@ -8,6 +8,7 @@ import useUserSession from "../../custom-hooks/useUserSession"
 import { Song } from "../../types/song"
 import { useContext } from "react"
 import { PlayerContext } from "../../layouts/FrontendLayuot"
+import NowPlayingBars from "./NowPlayingBars"
 type UserSongsProps = {
     userId: string | undefined
 }
@@ -18,7 +19,7 @@ export default function UserSongs({ userId }: UserSongsProps) {
     if (!context) {
         throw new Error("PlayerContext must be used within a PlayerProvider");
     }
-    const { setQueue, setCurrentIndex, currentIndex, toggleFavorite, isFavorite } = context;
+    const { setQueue, setCurrentIndex, currentIndex, toggleFavorite, isFavorite, isPlaying } = context;
 
     const { session } = useUserSession()
     const queryClient = useQueryClient()
@@ -100,11 +101,18 @@ export default function UserSongs({ userId }: UserSongsProps) {
                 <p className="text-gray-400 text-sm">No songs uploaded yet.</p>
             )}
 
-            {data?.map((song, index) => (
+            {data?.map((song, index) => {
+                const isCurrent = currentIndex !== null && data[currentIndex]?.id === song.id;
+
+                return (
                 <div
                     key={song.id}
                     onClick={() => startPlayingSong(data, index)}
-                    className="relative flex items-center gap-4 bg-white/10 backdrop-blur-md border border-white/10 p-3 rounded-xl hover:bg-hover group "
+                    className={`relative flex items-center gap-4 p-3 rounded-xl border transition-all duration-300 group ${
+                        isCurrent
+                            ? "bg-primary/15 border-primary/50 shadow-[0_0_24px_-8px_rgba(29,185,84,0.9)]"
+                            : "bg-white/10 backdrop-blur-md border-white/10 hover:bg-hover"
+                    }`}
                 >
 
                     {/* Cover */}
@@ -113,13 +121,19 @@ export default function UserSongs({ userId }: UserSongsProps) {
                         alt={song.title}
                         width={60}
                         height={60}
-                        className="w-14 h-14 object-cover rounded-lg"
+                        className={`w-14 h-14 object-cover rounded-lg shrink-0 ${isCurrent ? "ring-2 ring-primary/70" : ""}`}
                     />
 
                     {/* Info */}
                     <div className="flex flex-col flex-1 min-w-0">
+                        {isCurrent && (
+                            <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.2em] text-primary">
+                                <NowPlayingBars active={isPlaying} className="h-2" />
+                                Playing
+                            </span>
+                        )}
                         <p
-                            className={"text-sm font-medium truncate cursor-pointer  text-white"}
+                            className={`text-sm font-medium truncate cursor-pointer ${isCurrent ? "text-primary" : "text-white"}`}
                         >
                             {song.title}
                         </p>
@@ -156,7 +170,8 @@ export default function UserSongs({ userId }: UserSongsProps) {
                     </button>
 
                 </div>
-            ))}
+                );
+            })}
         </div>
     )
 }

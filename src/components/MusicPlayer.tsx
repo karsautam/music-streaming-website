@@ -7,10 +7,10 @@ import { MdOutlineLoop, MdOutlineQueueMusic, MdShuffle } from "react-icons/md";
 // Import the microphone icon for lyrics
 import { TbMicrophone2 } from "react-icons/tb"; 
 import { PlayerContext } from "../../layouts/FrontendLayuot";
+import NowPlayingBars from "./NowPlayingBars";
 
 export default function MusicPlayer() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(50);
     const [loop, setLoop] = useState(false);
     const [duration, setDuration] = useState(0);
@@ -22,7 +22,7 @@ export default function MusicPlayer() {
         throw new Error("MusicPlayer must be used inside PlayerProvider");
     }
 
-    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, currentTime, setCurrentTime, playNext, playPrev } = context;
+    const { isQueueModeOpen, setIsQueueModeOpen, isLyricsOpen, setIsLyricsOpen, lyricsSyncActive, shuffle, setShuffle, currentMusic, isPlaying, setIsPlaying, currentTime, setCurrentTime, playNext, playPrev } = context;
 
     const togglePlayButton = () => {
         if (!audioRef.current) return;
@@ -104,7 +104,7 @@ export default function MusicPlayer() {
             }
         };
         playAudio();
-    }, [currentMusic])
+    }, [currentMusic, setIsPlaying])
 
     useEffect(() => {
         const audio = audioRef.current;
@@ -181,18 +181,37 @@ export default function MusicPlayer() {
 
     if (!currentMusic) return null;
 
+    const progressPercent = duration ? (currentTime / duration) * 100 : 0;
+
     return (
-        <div className="fixed bottom-0 left-0 w-full bg-black text-white flex flex-wrap md:flex-nowrap items-center justify-between px-3 sm:px-6 py-2 sm:py-3 z-60 gap-y-2 md:gap-y-0">
+        <div className="fixed bottom-0 left-0 w-full bg-gradient-to-t from-black via-black to-zinc-900/70 text-white flex flex-wrap md:flex-nowrap items-center justify-between px-3 sm:px-6 py-2 sm:py-3 z-60 gap-y-2 md:gap-y-0 border-t border-white/10 shadow-[0_-10px_40px_-12px_rgba(0,0,0,0.9)]">
+            <div
+                aria-hidden="true"
+                className="absolute top-0 left-0 h-[2px] bg-primary shadow-[0_0_12px_1px_rgba(29,185,84,0.6)] transition-[width] duration-150 pointer-events-none"
+                style={{ width: `${progressPercent}%` }}
+            />
             <audio src={currentMusic.audio_url || ""} ref={audioRef}></audio>
             
             {/* Left Section - Song Info */}
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-[55%] md:w-auto md:flex-1 order-1">
-                <img
-                    src={currentMusic.cover_image || ""}
-                    alt="Song Cover"
-                    className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-md object-cover shrink-0"
-                />
+                <div className="relative shrink-0">
+                    <img
+                        src={currentMusic.cover_image || ""}
+                        alt="Song Cover"
+                        className={`w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-md object-cover transition-all duration-300 ${
+                            isPlaying
+                                ? "ring-2 ring-primary/80 ring-offset-2 ring-offset-black"
+                                : "opacity-70"
+                        }`}
+                    />
+                </div>
                 <div className="flex flex-col min-w-0 cursor-pointer">
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                        <NowPlayingBars active={isPlaying} className="h-2.5" />
+                        <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">
+                            {isPlaying ? "Now Playing" : "Paused"}
+                        </span>
+                    </div>
                     <h3 className="text-sm font-semibold truncate cursor-pointer">
                         {currentMusic.title}
                     </h3>
@@ -209,7 +228,7 @@ export default function MusicPlayer() {
                         <IoMdSkipBackward size={18} className="md:w-5 md:h-5" />
                     </button>
 
-                    <button onClick={togglePlayButton} className="cursor-pointer bg-white text-black h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center hover:scale-105 transition">
+                    <button onClick={togglePlayButton} className={`cursor-pointer h-8 w-8 sm:h-9 sm:w-9 rounded-full flex items-center justify-center hover:scale-105 transition-all ${isPlaying ? "bg-primary text-black shadow-[0_0_16px_-2px_rgba(29,185,84,0.8)]" : "bg-white text-black"}`}>
                         {isPlaying ? <IoMdPause size={18} /> : <IoMdPlay size={18} className="ml-0.5" />}
                     </button>
 
@@ -247,7 +266,8 @@ export default function MusicPlayer() {
                                 audioRef.current.currentTime = time;
                             }
                         }}
-                        className="w-full h-1 cursor-pointer bg-zinc-700 outline-none rounded-md accent-white"
+                        style={{ "--range-progress": `${progressPercent}%` } as React.CSSProperties}
+                        className="player-range w-full"
                     />
                     <span className="text-[10px] sm:text-xs text-gray-400 min-w-[35px]">{formatTime(duration)}</span>
                 </div>
@@ -294,7 +314,8 @@ export default function MusicPlayer() {
                         max="100"
                         value={volume}
                         onChange={handleChangeVolume}
-                        className="w-12 sm:w-16 md:w-[100px] outline-none h-1 bg-zinc-700 accent-white"
+                        style={{ "--range-progress": `${volume}%` } as React.CSSProperties}
+                        className="player-range w-12 sm:w-16 md:w-[100px]"
                     />
                 </div>
             </div>

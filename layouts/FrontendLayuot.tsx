@@ -21,6 +21,9 @@ type PlayerContextType = {
 
   currentMusic: Song | null;
 
+  isPlaying: boolean;
+  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+
   currentTime: number;
   setCurrentTime: React.Dispatch<React.SetStateAction<number>>;
 
@@ -58,6 +61,7 @@ export default function FrontendLayout({
   const [isQueueModeOpen, setIsQueueModeOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const [lyricsSyncActive, setLyricsSyncActive] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const [queue, setQueue] = useState<Song[]>([]);
   const [currentTime, setCurrentTime] = useState(0);
@@ -174,6 +178,8 @@ export default function FrontendLayout({
           lyricsSyncActive,
           setLyricsSyncActive,
           currentMusic,
+          isPlaying,
+          setIsPlaying,
           currentTime,
           setCurrentTime,
           currentIndex,
