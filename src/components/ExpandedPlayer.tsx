@@ -3,8 +3,7 @@
 import Image from "next/image"
 import { useContext } from "react"
 import { IoMdPause, IoMdPlay, IoMdSkipBackward, IoMdSkipForward, IoMdVolumeHigh, IoMdVolumeLow, IoMdVolumeOff } from "react-icons/io"
-import { MdClose, MdOutlineLoop, MdOutlineQueueMusic, MdShuffle } from "react-icons/md"
-import { TbMicrophone2 } from "react-icons/tb"
+import { MdClose, MdOutlineLoop, MdShuffle } from "react-icons/md"
 import { PlayerContext } from "../../layouts/FrontendLayuot"
 import NowPlayingBars from "./NowPlayingBars"
 
@@ -16,7 +15,6 @@ export default function ExpandedPlayer() {
         currentMusic, isPlaying, togglePlay, playNext, playPrev,
         shuffle, setShuffle, loop, setLoop, currentTime, duration, seek, formatTime,
         volume, setVolume, audioRef,
-        isLyricsOpen, setIsLyricsOpen, isQueueModeOpen, setIsQueueModeOpen,
         setIsNowPlayingOpen,
     } = context;
 
@@ -60,14 +58,14 @@ export default function ExpandedPlayer() {
                 <MdClose size={24} />
             </button>
 
-            <div className="relative flex flex-col sm:flex-row items-center gap-6 sm:gap-8 p-5 sm:p-7">
+            <div className="relative flex flex-col items-center gap-4 p-4 sm:p-6">
                 <div className="relative shrink-0">
                     <Image
                         src={currentMusic.cover_image}
                         alt={currentMusic.title}
                         width={500}
                         height={500}
-                        className={`w-56 h-56 sm:w-72 sm:h-72 lg:w-80 lg:h-80 object-cover rounded-xl shadow-2xl transition-all duration-500 ${
+                        className={`w-[min(34vh,17rem)] h-[min(34vh,17rem)] object-cover rounded-2xl shadow-2xl transition-all duration-500 ${
                             isPlaying ? "ring-2 ring-primary/70" : "opacity-85"
                         }`}
                     />
@@ -76,16 +74,16 @@ export default function ExpandedPlayer() {
                     </div>
                 </div>
 
-                <div className="flex-1 w-full min-w-0 flex flex-col gap-5">
-                    <div className="text-center sm:text-left">
-                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-1.5">
+                <div className="w-full max-w-xl flex flex-col gap-3 sm:gap-4">
+                    <div className="text-center">
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-primary mb-1">
                             <NowPlayingBars active={isPlaying} className="h-2" />
                             {isPlaying ? "Now Playing" : "Paused"}
                         </span>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-white truncate">
+                        <h2 className="text-xl sm:text-2xl font-bold text-white truncate">
                             {currentMusic.title}
                         </h2>
-                        <p className="text-sm sm:text-base text-secondary-text truncate">
+                        <p className="text-xs sm:text-sm text-secondary-text truncate">
                             {currentMusic.artist}
                         </p>
                     </div>
@@ -106,7 +104,7 @@ export default function ExpandedPlayer() {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-center sm:justify-start gap-5 sm:gap-7">
+                    <div className="flex items-center justify-center gap-5 sm:gap-7">
                         <button
                             onClick={() => setShuffle(prev => !prev)}
                             className={`cursor-pointer transition ${shuffle ? "text-primary" : "text-gray-400 hover:text-white"}`}
@@ -121,7 +119,7 @@ export default function ExpandedPlayer() {
 
                         <button
                             onClick={togglePlay}
-                            className={`cursor-pointer h-14 w-14 rounded-full flex items-center justify-center hover:scale-105 transition-all ${
+                            className={`cursor-pointer h-12 w-12 rounded-full flex items-center justify-center hover:scale-105 transition-all ${
                                 isPlaying
                                     ? "bg-primary text-black shadow-[0_0_28px_-4px_rgba(29,185,84,0.9)]"
                                     : "bg-white text-black"
@@ -143,7 +141,7 @@ export default function ExpandedPlayer() {
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 max-w-52 mx-auto w-full">
                         <button onClick={toggleMute} className="cursor-pointer text-gray-300 hover:text-white transition" title="Mute">
                             {volume === 0 ? (
                                 <IoMdVolumeOff size={20} />
@@ -164,23 +162,7 @@ export default function ExpandedPlayer() {
                         />
                     </div>
 
-                    <div className="flex items-center justify-center sm:justify-start gap-5">
-                        <button
-                            onClick={() => setIsLyricsOpen(prev => !prev)}
-                            className={`cursor-pointer transition ${isLyricsOpen ? "text-primary" : "text-gray-400 hover:text-white"}`}
-                            title="Lyrics"
-                        >
-                            <TbMicrophone2 size={20} />
-                        </button>
-                        <button
-                            onClick={() => setIsQueueModeOpen(prev => !prev)}
-                            className={`cursor-pointer transition ${isQueueModeOpen ? "text-primary" : "text-gray-400 hover:text-white"}`}
-                            title="Queue"
-                        >
-                            <MdOutlineQueueMusic size={22} />
-                        </button>
                     </div>
-                </div>
             </div>
         </section>
     );

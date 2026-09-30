@@ -115,7 +115,9 @@ export default function Allsongs() {
         <ExpandedPlayer key={currentMusic.id} />
 
         {/* Lyrics - reached by scrolling down, Spotify style */}
-        <AllSongsLyrics />
+        <div className="mt-4" id="expanded-lyrics">
+          <AllSongsLyrics />
+        </div>
       </div>
     );
   }

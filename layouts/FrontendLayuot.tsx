@@ -19,6 +19,11 @@ type PlayerContextType = {
   lyricsSyncActive: boolean;
   setLyricsSyncActive: React.Dispatch<React.SetStateAction<boolean>>;
 
+  lyricsFetchState: "idle" | "loading" | "notfound" | "done";
+  setLyricsFetchState: React.Dispatch<
+    React.SetStateAction<"idle" | "loading" | "notfound" | "done">
+  >;
+
   currentMusic: Song | null;
 
   isPlaying: boolean;
@@ -76,6 +81,8 @@ export default function FrontendLayout({
   const [isQueueModeOpen, setIsQueueModeOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const [lyricsSyncActive, setLyricsSyncActive] = useState(false);
+  const [lyricsFetchState, setLyricsFetchState] =
+    useState<"idle" | "loading" | "notfound" | "done">("idle");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -128,6 +135,8 @@ export default function FrontendLayout({
       ? queue[currentIndex]
       : null;
 
+  const currentAudioUrl = currentMusic?.audio_url ?? null;
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -159,7 +168,7 @@ export default function FrontendLayout({
       audio.removeEventListener("pause", syncPlaying);
       audio.removeEventListener("ended", syncEnded);
     };
-  }, [currentMusic]);
+  }, [currentAudioUrl]);
 
   // ✅ Favorites (localStorage)
   const [favorites, setFavorites] = useState<Song[]>(() => {
@@ -202,6 +211,7 @@ export default function FrontendLayout({
   useEffect(() => {
     if (!currentMusic) return;
     setRecentlyPlayed((prev) => {
+      if (prev[0]?.id === currentMusic.id) return prev;
       const next = [
         currentMusic,
         ...prev.filter((s) => s.id !== currentMusic.id),
@@ -217,7 +227,7 @@ export default function FrontendLayout({
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || !currentMusic) return;
+    if (!audio || !currentAudioUrl) return;
 
     audio.currentTime = 0;
     audio.load();
@@ -232,7 +242,7 @@ export default function FrontendLayout({
       }
     };
     playAudio();
-  }, [currentMusic]);
+  }, [currentAudioUrl]);
 
   // ✅ Play Next (shuffle-aware)
   const playNext = () => {
@@ -295,8 +305,10 @@ export default function FrontendLayout({
           setIsQueueModeOpen,
           isLyricsOpen,
           setIsLyricsOpen,
-          lyricsSyncActive,
-          setLyricsSyncActive,
+lyricsSyncActive,
+    setLyricsSyncActive,
+    lyricsFetchState,
+    setLyricsFetchState,
           currentMusic,
           isPlaying,
           setIsPlaying,
@@ -334,7 +346,7 @@ export default function FrontendLayout({
           {/* Navbar */}
           <Navbar />
 
-          <div className="flex pt-16 pb-20">
+          <div className={`flex pt-16 ${isNowPlayingOpen ? "pb-6" : "pb-20"}`}>
 
             {/* Sidebar */}
             <Sidebar />
@@ -360,8 +372,8 @@ export default function FrontendLayout({
             ></audio>
           )}
 
-          {/* 🎵 Music Player only renders if song exists */}
-          {currentMusic && <MusicPlayer />}
+          {/* 🎵 Music Player only renders if song exists and expanded view is closed */}
+          {currentMusic && !isNowPlayingOpen && <MusicPlayer />}
 
         </div>
       </PlayerContext.Provider>

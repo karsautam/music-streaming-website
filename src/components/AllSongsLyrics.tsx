@@ -2,6 +2,7 @@
 
 import { useContext } from "react"
 import { PlayerContext } from "../../layouts/FrontendLayuot"
+import NowPlayingBars from "./NowPlayingBars"
 
 type LyricLine = {
     time: number;
@@ -39,6 +40,7 @@ export default function AllSongsLyrics() {
 
     const currentMusic = context?.currentMusic;
     const currentTime = context?.currentTime ?? 0;
+    const isLoading = (context?.lyricsFetchState ?? "idle") === "loading";
 
     const lyrics = currentMusic?.lyrics;
     const parsed = lyrics ? parseLyrics(lyrics) : null;
@@ -51,12 +53,14 @@ export default function AllSongsLyrics() {
         }
     }
 
+    const visibleFrom = activeIndex >= 0 ? activeIndex : 0;
+
     if (!currentMusic) return null;
 
     const hasLyrics = plainLines.length > 0;
 
     return (
-        <section className="mt-12 rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/60 to-background p-5 sm:p-7">
+        <section className="relative z-30 rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900/60 to-background p-5 sm:p-7">
             <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-white text-lg font-semibold">Lyrics</h3>
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
@@ -68,26 +72,40 @@ export default function AllSongsLyrics() {
             </p>
 
             {!hasLyrics ? (
-                <p className="text-secondary-text text-sm py-4">
-                    No lyrics for this song yet. Add plain lyrics to the{" "}
-                    <code className="text-primary">lyrics</code> column in Supabase
-                    to see them here.
-                </p>
+                <div className="py-6 text-center">
+                    {isLoading ? (
+                        <>
+                            <NowPlayingBars active className="mx-auto h-4 w-fit" />
+                            <p className="text-secondary-text text-sm mt-3">
+                                Looking up synced lyrics…
+                            </p>
+                        </>
+                    ) : (
+                        <p className="text-secondary-text text-sm">
+                            No synced lyrics found for this song. Add lyrics to the{" "}
+                            <code className="text-primary">lyrics</code> column in
+                            Supabase to see them here.
+                        </p>
+                    )}
+                </div>
             ) : (
-                <div className="max-h-80 overflow-y-auto pr-2 [scrollbar-width:thin]">
+                <div className="max-h-80 overflow-hidden">
                     {parsed
-                        ? parsed.map((line, index) => (
-                              <p
-                                  key={`${line.time}-${index}`}
-                                  className={`py-1.5 text-base sm:text-lg leading-relaxed transition-all duration-300 ${
-                                      index === activeIndex
-                                          ? "text-primary font-semibold scale-[1.02]"
-                                          : "text-secondary-text/60 hover:text-secondary-text"
-                                  }`}
-                              >
-                                  {line.text || "♪"}
-                              </p>
-                          ))
+                        ? parsed.slice(visibleFrom).map((line, offset) => {
+                              const index = visibleFrom + offset;
+                              return (
+                                  <p
+                                      key={`${line.time}-${index}`}
+                                      className={`py-1.5 text-base sm:text-lg leading-relaxed transition-all duration-300 ${
+                                          index === activeIndex
+                                              ? "text-primary font-semibold"
+                                              : "text-secondary-text/60"
+                                      }`}
+                                  >
+                                      {line.text || "♪"}
+                                  </p>
+                              );
+                          })
                         : plainLines.map((line, index) => (
                               <p
                                   key={index}

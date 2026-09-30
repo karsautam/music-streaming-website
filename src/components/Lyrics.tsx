@@ -49,7 +49,7 @@ export default function Lyrics() {
   const context = useContext(PlayerContext);
   if (!context) return null;
 
-  const { isLyricsOpen, setIsLyricsOpen, currentMusic, currentTime, setQueue, setLyricsSyncActive } =
+  const { isLyricsOpen, setIsLyricsOpen, isNowPlayingOpen, currentMusic, currentTime, setQueue, setLyricsSyncActive } =
     context;
 
   const queryClient = useQueryClient();
@@ -62,9 +62,8 @@ export default function Lyrics() {
   const [syncTimes, setSyncTimes] = useState<number[]>([]);
   const [syncSaved, setSyncSaved] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [autoState, setAutoState] = useState<
-    "idle" | "loading" | "notfound" | "done"
-  >("idle");
+  const { setLyricsFetchState: setAutoState, lyricsFetchState: autoState } =
+    context;
   const fetchedForIdRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -252,10 +251,11 @@ export default function Lyrics() {
   };
 
   useEffect(() => {
-    if (!isLyricsOpen || !currentMusic || isSyncMode || parsed) return;
+    if (!isLyricsOpen && !isNowPlayingOpen) return;
+    if (!currentMusic || isSyncMode || parsed) return;
     startAutoFetch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLyricsOpen, currentMusic?.id, parsed, isSyncMode]);
+  }, [isLyricsOpen, isNowPlayingOpen, currentMusic?.id, parsed, isSyncMode]);
 
   const copyGenerated = async () => {
     try {
@@ -281,9 +281,10 @@ export default function Lyrics() {
         w-96 max-w-[calc(100vw-3rem)] h-[75vh]
         bg-[#121212] border border-zinc-900
         rounded-2xl shadow-2xl
+        z-50
         flex flex-col overflow-hidden
         transform transition-all duration-300 ease-out
-        ${isLyricsOpen
+        ${isLyricsOpen && !isNowPlayingOpen
           ? "opacity-100 translate-y-0 scale-100"
           : "opacity-0 translate-y-3 scale-95 pointer-events-none"}
       `}
